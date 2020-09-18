@@ -7,10 +7,11 @@ export = {
 
     if (/\.(t|j)sx?$/.test(path)) {
       return transformSync(src, {
+        ...transformOptions,
         filename: path,
         jsc: {
           transform: {
-            //@ts-expect-error
+            //@ts-ignore
             hidden: {
               jest: true
             }
