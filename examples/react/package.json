@@ -15,8 +15,10 @@
     "react": "^16.13.1"
   },
   "jest": {
+    "rootDir": "src",
     "testMatch": [
-      "<rootDir>/**/*.test.{ts,tsx,js,jsx}"
+      "<rootDir>/**/*.test.{ts,tsx,js,jsx}",
+      "<rootDir>/*.test.{ts,tsx,js,jsx}"
     ],
     "moduleFileExtensions": [
       "ts",
@@ -27,8 +29,8 @@
       "node"
     ],
     "transform": {
-      ".*": [
-        "../.."
+      "^.+\\.(t|j)sx?$": [
+        "../../.."
       ]
     },
     "testEnvironment": "node"
