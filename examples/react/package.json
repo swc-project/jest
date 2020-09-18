@@ -14,6 +14,13 @@
     "@swc/jest": "file:../..",
     "react": "^16.13.1"
   },
+  "jest": {
+    "transform": {
+      ".*": [
+        "../.."
+      ]
+    }
+  },
   "devDependencies": {
     "@types/jest": "^26.0.14",
     "jest": "^26.4.2",
