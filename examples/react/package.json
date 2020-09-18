@@ -1,0 +1,43 @@
+{
+  "name": "examples",
+  "version": "1.0.0",
+  "private": true,
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@swc/jest": "file:../..",
+    "react": "^16.13.1"
+  },
+  "jest": {
+    "rootDir": "src",
+    "testMatch": [
+      "<rootDir>/**/*.test.{ts,tsx,js,jsx}",
+      "<rootDir>/*.test.{ts,tsx,js,jsx}"
+    ],
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ],
+    "transform": {
+      "^.+\\.(t|j)sx?$": [
+        "../../.."
+      ]
+    },
+    "testEnvironment": "node"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.14",
+    "jest": "^26.4.2",
+    "typescript": "^4.0.2"
+  }
+}
