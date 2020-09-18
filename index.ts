@@ -14,8 +14,11 @@ export = {
             hidden: {
               jest: true
             }
-          }
+          },
         },
+        module: {
+          type: "commonjs"
+        }
       })
     }
     return src
