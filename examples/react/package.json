@@ -15,11 +15,23 @@
     "react": "^16.13.1"
   },
   "jest": {
+    "testMatch": [
+      "<rootDir>/**/*.test.{ts,tsx,js,jsx}"
+    ],
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ],
     "transform": {
       ".*": [
         "../.."
       ]
-    }
+    },
+    "testEnvironment": "node"
   },
   "devDependencies": {
     "@types/jest": "^26.0.14",
