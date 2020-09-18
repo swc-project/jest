@@ -6,7 +6,7 @@
   "homepage": "https://github.com/swc-project/jest",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepublishonly": "tsc"
+    "prepublishOnly": "tsc"
   },
   "keywords": [],
   "author": "강동윤 <kdy1997.dev@gmail.com>",
@@ -22,5 +22,8 @@
     "@types/node": "^14.11.1",
     "jest": "^26.4.2",
     "typescript": "^4.0.2"
-  }
+  },
+  "files": [
+    "index.js"
+  ]
 }
