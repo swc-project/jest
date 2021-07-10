@@ -6,9 +6,9 @@ import { transformSync, Options } from '@swc/core'
 let transformOpts: Options
 
 export = {
-  process(src: string, filepath: string, jestConfig: any) {
+  process(src: string, filename: string, jestConfig: any) {
 
-    if (/\.(t|j)sx?$/.test(filepath)) {
+    if (/\.(t|j)sx?$/.test(filename)) {
 
       if (!transformOpts) {
         const isSwcJestTransformer = ([, transformerPath]: [unknown, string]) => transformerPath === __filename
@@ -26,9 +26,7 @@ export = {
         transformOpts = swcOptions
       }
 
-      transformOpts.filename = filepath
-
-      return transformSync(src, transformOpts)
+      return transformSync(src, { ...transformOpts, filename })
     }
 
     return src
