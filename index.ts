@@ -2,8 +2,35 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { transformSync, Options } from '@swc/core'
 
+interface JestConfig26 {
+  transform: [match: string, transformerPath: string, options: Options][];
+}
+
+interface JestConfig27 {
+  transformerConfig: Options;
+}
 
 let transformOpts: Options
+
+function getJestTransformConfig(
+  jestConfig: JestConfig26 | JestConfig27
+): Options {
+  if ("transformerConfig" in jestConfig) {
+    // jest 27
+    return jestConfig.transformerConfig;
+  }
+
+  if ("transform" in jestConfig) {
+    // jest 26
+    return (
+      jestConfig.transform.find(
+        ([, transformerPath]) => transformerPath === __filename
+      )?.[2] ?? {}
+    );
+  }
+
+  return {};
+}
 
 export = {
   process(src: string, filename: string, jestConfig: any) {
@@ -11,9 +38,7 @@ export = {
     if (/\.(t|j)sx?$/.test(filename)) {
 
       if (!transformOpts) {
-        const isSwcJestTransformer = ([, transformerPath]: [unknown, string]) => transformerPath === __filename
-
-        let [, , swcOptions] = (jestConfig.transform || []).find(isSwcJestTransformer) || []
+        let swcOptions = getJestTransformConfig(jestConfig);
 
         if (!swcOptions) {
           const swcrc = path.join(process.cwd(), '.swcrc')
