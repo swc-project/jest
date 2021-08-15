@@ -45,7 +45,7 @@ export = {
           swcOptions = fs.existsSync(swcrc) ? JSON.parse(fs.readFileSync(swcrc, 'utf-8')) : {}
         }
 
-        set(swcOptions, 'module.type', 'commonjs')
+        // set(swcOptions, 'module.type', 'commonjs')
         set(swcOptions, 'jsc.transform.hidden.jest', true)
 
         transformOpts = swcOptions

@@ -37,4 +37,4 @@ module.exports = {
 
 MIT
 
-[swc]: https://swc-project.github.io/
+[swc]: https://swc.rs
