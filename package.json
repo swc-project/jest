@@ -15,7 +15,7 @@
     "registry": "https://registry.npmjs.org/",
     "access": "public"
   },
-  "pperDependencies": {
+  "peerDependencies": {
     "@swc/core": "^1.2.30"
   },
   "devDependencies": {
