@@ -14,7 +14,7 @@ let transformOpts: Options
 
 function getJestTransformConfig(
   jestConfig: JestConfig26 | JestConfig27
-): Options {
+): Options | undefined {
   if ("transformerConfig" in jestConfig) {
     // jest 27
     return jestConfig.transformerConfig;
@@ -25,11 +25,9 @@ function getJestTransformConfig(
     return (
       jestConfig.transform.find(
         ([, transformerPath]) => transformerPath === __filename
-      )?.[2] ?? {}
+      )?.[2]
     );
   }
-
-  return {};
 }
 
 export = {
@@ -42,7 +40,7 @@ export = {
 
         if (!swcOptions) {
           const swcrc = path.join(process.cwd(), '.swcrc')
-          swcOptions = fs.existsSync(swcrc) ? JSON.parse(fs.readFileSync(swcrc, 'utf-8')) : {}
+          swcOptions = fs.existsSync(swcrc) ? JSON.parse(fs.readFileSync(swcrc, 'utf-8')) as Options : {}
         }
 
         // set(swcOptions, 'module.type', 'commonjs')
