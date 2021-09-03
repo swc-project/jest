@@ -30,12 +30,16 @@ function getJestTransformConfig(
   }
 }
 
+function isEmptyTransformOptions(options: any) {
+  return !(options && Object.keys(options).length)
+}
+
 export = {
   process(src: string, filename: string, jestConfig: any) {
 
     if (/\.(t|j)sx?$/.test(filename)) {
 
-      if (!transformOpts) {
+      if (isEmptyTransformOptions(transformOpts)) {
         let swcOptions = getJestTransformConfig(jestConfig);
 
         if (!swcOptions) {
