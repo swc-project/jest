@@ -1,6 +1,6 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import { transformSync, Options } from '@swc/core'
+import { transformSync, Options, TsParserConfig } from '@swc/core'
 
 interface JestConfig26 {
   transform: [match: string, transformerPath: string, options: Options][];
@@ -47,12 +47,21 @@ export = {
           swcOptions = fs.existsSync(swcrc) ? JSON.parse(fs.readFileSync(swcrc, 'utf-8')) as Options : {}
         }
 
-        // set(swcOptions, 'module.type', 'commonjs')
+
         set(swcOptions, 'jsc.transform.hidden.jest', true)
 
         transformOpts = swcOptions
       }
 
+      const parserConfig = transformOpts.jsc?.parser as TsParserConfig;
+      
+      // typescript: `tsx` will be modified if file extension is `ts`.
+
+      if (parserConfig.tsx && /\.ts$/.test(filename)) {
+        parserConfig.tsx = false;
+      } else if (parserConfig.tsx === false && /\.tsx$/.test(filename)) {
+        parserConfig.tsx = true;
+      }
       return transformSync(src, { ...transformOpts, filename })
     }
 
