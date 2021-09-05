@@ -53,15 +53,14 @@ export = {
         transformOpts = swcOptions
       }
 
-      const parserConfig = transformOpts.jsc?.parser as TsParserConfig;
-      
-      // typescript: `tsx` will be modified if file extension is `ts`.
 
-      if (parserConfig.tsx && /\.ts$/.test(filename)) {
-        parserConfig.tsx = false;
-      } else if (parserConfig.tsx === false && /\.tsx$/.test(filename)) {
-        parserConfig.tsx = true;
+      const parserConfig = transformOpts.jsc?.parser;
+
+      // typescript: `tsx` will be modified if file extension is `ts`.
+      if (parserConfig?.syntax === 'typescript') {
+        parserConfig.tsx = /\.tsx$/.test(filename);
       }
+
       return transformSync(src, { ...transformOpts, filename })
     }
 
