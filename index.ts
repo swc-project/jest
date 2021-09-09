@@ -30,12 +30,16 @@ function getJestTransformConfig(
   }
 }
 
+function isEmptyTransformOptions(options: any) {
+  return !(options && Object.keys(options).length)
+}
+
 export = {
   process(src: string, filename: string, jestConfig: any) {
 
     if (/\.(t|j)sx?$/.test(filename)) {
 
-      if (!transformOpts) {
+      if (isEmptyTransformOptions(transformOpts)) {
         let swcOptions = getJestTransformConfig(jestConfig);
 
         if (!swcOptions) {
@@ -43,7 +47,6 @@ export = {
           swcOptions = fs.existsSync(swcrc) ? JSON.parse(fs.readFileSync(swcrc, 'utf-8')) as Options : {}
         }
 
-        // set(swcOptions, 'module.type', 'commonjs')
         set(swcOptions, 'jsc.transform.hidden.jest', true)
 
         transformOpts = swcOptions

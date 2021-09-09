@@ -6,9 +6,9 @@
 
 ```sh
 # if you use npm
-npm i -D jest @swc/jest
+npm i -D jest @swc/core @swc/jest
 # if you use yarn
-yarn add jest @swc/jest
+yarn add jest @swc/core @swc/jest
 ```
 
 ## Usage
