@@ -1,62 +1,85 @@
 import * as fs from 'fs'
 import * as path from 'path'
+import * as vm from 'vm'
 import { transformSync, Options } from '@swc/core'
 
-interface JestConfig26 {
+interface JestConfig {
   transform: [match: string, transformerPath: string, options: Options][];
+  extensionsToTreatAsEsm?: string[]
 }
 
-interface JestConfig27 {
+interface JestTransformerOption {
+  config: JestConfig;
   transformerConfig: Options;
 }
 
-let transformOpts: Options
+const packagePath = path.join(process.cwd(), 'package.json')
+const packageConfig = JSON.parse(fs.readFileSync(packagePath, 'utf-8'))
+const isEsmProject = packageConfig.type === 'module'
 
-function getJestTransformConfig(
-  jestConfig: JestConfig26 | JestConfig27
-): Options | undefined {
-  if ("transformerConfig" in jestConfig) {
-    // jest 27
-    return jestConfig.transformerConfig;
-  }
+// Jest use the `vm` [Module API](https://nodejs.org/api/vm.html#vm_class_vm_module) for ESM.
+// see https://github.com/facebook/jest/issues/9430
+const isSupportEsm = 'Module' in vm
 
-  if ("transform" in jestConfig) {
-    // jest 26
-    return (
-      jestConfig.transform.find(
-        ([, transformerPath]) => transformerPath === __filename
-      )?.[2]
-    );
-  }
-}
-
-function isEmptyTransformOptions(options: any) {
-  return !(options && Object.keys(options).length)
-}
+let swcTransformOpts: Options
 
 export = {
-  process(src: string, filename: string, jestConfig: any) {
+  process(src: string, filename: string, jestOptions: any) {
 
-    if (/\.(t|j)sx?$/.test(filename)) {
-
-      if (isEmptyTransformOptions(transformOpts)) {
-        let swcOptions = getJestTransformConfig(jestConfig);
-
-        if (!swcOptions) {
-          const swcrc = path.join(process.cwd(), '.swcrc')
-          swcOptions = fs.existsSync(swcrc) ? JSON.parse(fs.readFileSync(swcrc, 'utf-8')) as Options : {}
-        }
-
-        set(swcOptions, 'jsc.transform.hidden.jest', true)
-
-        transformOpts = swcOptions
-      }
-
-      return transformSync(src, { ...transformOpts, filename })
+    if (!/\.[jt]sx?$/.test(filename)) {
+      return src
     }
 
-    return src
+    if (!swcTransformOpts) {
+      swcTransformOpts = buildSwcTransformOpts(jestOptions)
+    }
+
+    if (isSupportEsm) {
+      set(swcTransformOpts, 'module.type', isEsm(filename, jestOptions) ? 'es6' : 'commonjs')
+    }
+
+    return transformSync(src, { ...swcTransformOpts, filename })
   },
+}
+
+function buildSwcTransformOpts(jestOptions: any) {
+  let swcOptions = getSwcTransformConfig(jestOptions)
+
+  if (!swcOptions) {
+    const swcrc = path.join(process.cwd(), '.swcrc')
+    swcOptions = fs.existsSync(swcrc) ? JSON.parse(fs.readFileSync(swcrc, 'utf-8')) as Options : {}
+  }
+
+  if (!isSupportEsm) {
+    set(swcOptions, 'module.type', 'commonjs')
+  }
+
+  set(swcOptions, 'jsc.transform.hidden.jest', true)
+
+  return swcOptions
+}
+
+function getSwcTransformConfig(
+  jestConfig: JestConfig | JestTransformerOption
+): Options | undefined {
+  return (
+    getJestConfig(jestConfig).transform.find(
+      ([, transformerPath]) => transformerPath === __filename
+    )?.[2]
+  );
+}
+
+function getJestConfig(jestConfig: JestConfig | JestTransformerOption) {
+  return 'config' in jestConfig
+    // jest 27
+    ? jestConfig.config
+    // jest 26
+    : jestConfig
+}
+
+function isEsm(filename: string, jestOptions: any) {
+  return (/\.jsx?$/.test(filename) && isEsmProject) ||
+    getJestConfig(jestOptions).extensionsToTreatAsEsm?.find((ext: string) => filename.endsWith(ext))
 }
 
 function set(obj: any, path: string, value: any) {
