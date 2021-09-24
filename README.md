@@ -43,6 +43,17 @@ module.exports = {
 
 A: Setup Jest following this [Guide](https://jestjs.io/docs/ecmascript-modules).
 
+  For JavaScript, it need to configure `package.json`:
+  
+  ```json
+  {
+    // ...
+    "type": "module"
+  }
+  ```
+
+  For TypeScript, it need some configuration in `jest.config.js`:
+
   ```js
   module.exports = {
     // ...
@@ -50,7 +61,7 @@ A: Setup Jest following this [Guide](https://jestjs.io/docs/ecmascript-modules).
   }
   ```
 
-  Run test with `--experimental-vm-modules`
+  Run test with `--experimental-vm-modules`:
 
   ```sh
   cross-env NODE_OPTIONS=--experimental-vm-modules jest

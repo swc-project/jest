@@ -16,25 +16,29 @@ interface JestTransformerOption {
 const packagePath = path.join(process.cwd(), 'package.json')
 const packageConfig = JSON.parse(fs.readFileSync(packagePath, 'utf-8'))
 const isEsmProject = packageConfig.type === 'module'
+
+// Jest use the `vm` [Module API](https://nodejs.org/api/vm.html#vm_class_vm_module) for ESM.
+// see https://github.com/facebook/jest/issues/9430
+const isSupportEsm = 'Module' in vm
+
 let swcTransformOpts: Options
 
 export = {
   process(src: string, filename: string, jestOptions: any) {
 
-    if (/\.[jt]sx?$/.test(filename)) {
-
-      if (!swcTransformOpts) {
-        swcTransformOpts = buildSwcTransformOpts(jestOptions)
-      }
-
-      if (isSupportEsm()) {
-        set(swcTransformOpts, 'module.type', isEsm(filename, jestOptions) ? 'es6' : 'commonjs')
-      }
-
-      return transformSync(src, { ...swcTransformOpts, filename })
+    if (!/\.[jt]sx?$/.test(filename)) {
+      return src
     }
 
-    return src
+    if (!swcTransformOpts) {
+      swcTransformOpts = buildSwcTransformOpts(jestOptions)
+    }
+
+    if (isSupportEsm) {
+      set(swcTransformOpts, 'module.type', isEsm(filename, jestOptions) ? 'es6' : 'commonjs')
+    }
+
+    return transformSync(src, { ...swcTransformOpts, filename })
   },
 }
 
@@ -46,7 +50,7 @@ function buildSwcTransformOpts(jestOptions: any) {
     swcOptions = fs.existsSync(swcrc) ? JSON.parse(fs.readFileSync(swcrc, 'utf-8')) as Options : {}
   }
 
-  if (!isSupportEsm()) {
+  if (!isSupportEsm) {
     set(swcOptions, 'module.type', 'commonjs')
   }
 
@@ -71,10 +75,6 @@ function getJestConfig(jestConfig: JestConfig | JestTransformerOption) {
     ? jestConfig.config
     // jest 26
     : jestConfig
-}
-
-function isSupportEsm() {
-  return 'Module' in vm
 }
 
 function isEsm(filename: string, jestOptions: any) {
