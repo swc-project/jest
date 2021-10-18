@@ -15,6 +15,10 @@
     "registry": "https://registry.npmjs.org/",
     "access": "public"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/swc-project/jest.git"
+  },
   "peerDependencies": {
     "@swc/core": "*"
   },
