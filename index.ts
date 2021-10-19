@@ -13,8 +13,22 @@ interface JestTransformerOption {
   transformerConfig: Options;
 }
 
-const packagePath = path.join(process.cwd(), 'package.json')
-const packageConfig = JSON.parse(fs.readFileSync(packagePath, 'utf-8'))
+/**
+ * Loads closes package.json in the directory hierarchy
+ */
+function loadClosesPackageJson(attempts = 1): Record<string, unknown> {
+  if (attempts > 5) {
+      throw new Error('Can\'t resolve main package.json file');
+  }
+  var mainPath = attempts === 1 ? './' : Array(attempts).join("../");
+  try {
+      return require(mainPath + 'package.json');
+  } catch (e) {
+      return loadClosesPackageJson(attempts + 1);
+  }
+}
+
+const packageConfig = loadClosesPackageJson()
 const isEsmProject = packageConfig.type === 'module'
 
 // Jest use the `vm` [Module API](https://nodejs.org/api/vm.html#vm_class_vm_module) for ESM.
