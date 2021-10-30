@@ -1,6 +1,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import * as vm from 'vm'
+import getCacheKeyFunction from '@jest/create-cache-key-function';
 import { transformSync, Options } from '@swc/core'
 
 interface JestConfig {
@@ -50,6 +51,8 @@ function createTransformer(swcTransformOpts?: Options) {
 
       return transformSync(src, { ...swcTransformOpts, filename })
     },
+
+    getCacheKey: getCacheKeyFunction([], [JSON.stringify(swcTransformOpts)])
   }
 }
 
