@@ -39,11 +39,6 @@ let swcTransformOpts: Options
 
 export = {
   process(src: string, filename: string, jestOptions: any) {
-
-    if (!/\.[jt]sx?$/.test(filename)) {
-      return src
-    }
-
     if (!swcTransformOpts) {
       swcTransformOpts = buildSwcTransformOpts(jestOptions)
     }
