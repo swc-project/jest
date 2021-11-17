@@ -22,7 +22,7 @@ function loadClosesPackageJson(attempts = 1): Record<string, unknown> {
   }
   var mainPath = attempts === 1 ? './' : Array(attempts).join("../");
   try {
-      return require(mainPath + 'package.json');
+      return require(path.join(process.cwd(), mainPath, 'package.json'));
   } catch (e) {
       return loadClosesPackageJson(attempts + 1);
   }
