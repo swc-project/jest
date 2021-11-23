@@ -41,17 +41,13 @@ function createTransformer(swcTransformOpts?: Options) {
 
   return {
     process(src: string, filename: string, jestOptions: any) {
-      if (!/\.[jt]sx?$/.test(filename)) {
-        return src
-      }
-
       if (isSupportEsm) {
         set(swcTransformOpts, 'module.type', isEsm(filename, jestOptions) ? 'es6' : 'commonjs')
       }
 
       return transformSync(src, { ...swcTransformOpts, filename })
     },
-
+    
     getCacheKey: getCacheKeyFunction([], [JSON.stringify(swcTransformOpts)])
   }
 }
