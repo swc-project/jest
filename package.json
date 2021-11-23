@@ -22,6 +22,9 @@
   "peerDependencies": {
     "@swc/core": "*"
   },
+  "dependencies": {
+    "@jest/create-cache-key-function": "^27.3.1"
+  },
   "devDependencies": {
     "@swc/core": "^1.2.85",
     "@types/node": "^14.17.14",

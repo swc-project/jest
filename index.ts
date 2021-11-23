@@ -1,6 +1,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import * as vm from 'vm'
+import getCacheKeyFunction from '@jest/create-cache-key-function';
 import { transformSync, Options } from '@swc/core'
 
 interface JestConfig {
@@ -35,30 +36,29 @@ const isEsmProject = packageConfig.type === 'module'
 // see https://github.com/facebook/jest/issues/9430
 const isSupportEsm = 'Module' in vm
 
-let swcTransformOpts: Options
+function createTransformer(swcTransformOpts?: Options) {
+  swcTransformOpts = buildSwcTransformOpts(swcTransformOpts)
 
-export = {
-  process(src: string, filename: string, jestOptions: any) {
+  return {
+    process(src: string, filename: string, jestOptions: any) {
+      if (!/\.[jt]sx?$/.test(filename)) {
+        return src
+      }
 
-    if (!/\.[jt]sx?$/.test(filename)) {
-      return src
-    }
+      if (isSupportEsm) {
+        set(swcTransformOpts, 'module.type', isEsm(filename, jestOptions) ? 'es6' : 'commonjs')
+      }
 
-    if (!swcTransformOpts) {
-      swcTransformOpts = buildSwcTransformOpts(jestOptions)
-    }
+      return transformSync(src, { ...swcTransformOpts, filename })
+    },
 
-    if (isSupportEsm) {
-      set(swcTransformOpts, 'module.type', isEsm(filename, jestOptions) ? 'es6' : 'commonjs')
-    }
-
-    return transformSync(src, { ...swcTransformOpts, filename })
-  },
+    getCacheKey: getCacheKeyFunction([], [JSON.stringify(swcTransformOpts)])
+  }
 }
 
-function buildSwcTransformOpts(jestOptions: any) {
-  let swcOptions = getSwcTransformConfig(jestOptions)
+export = { createTransformer };
 
+function buildSwcTransformOpts(swcOptions: any) {
   if (!swcOptions) {
     const swcrc = path.join(process.cwd(), '.swcrc')
     swcOptions = fs.existsSync(swcrc) ? JSON.parse(fs.readFileSync(swcrc, 'utf-8')) as Options : {}
@@ -71,16 +71,6 @@ function buildSwcTransformOpts(jestOptions: any) {
   set(swcOptions, 'jsc.transform.hidden.jest', true)
 
   return swcOptions
-}
-
-function getSwcTransformConfig(
-  jestConfig: JestConfig | JestTransformerOption
-): Options | undefined {
-  return (
-    getJestConfig(jestConfig).transform.find(
-      ([, transformerPath]) => transformerPath === __filename
-    )?.[2]
-  );
 }
 
 function getJestConfig(jestConfig: JestConfig | JestTransformerOption) {
