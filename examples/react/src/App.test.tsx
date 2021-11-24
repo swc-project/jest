@@ -1,5 +1,8 @@
+import React from 'react';
 import { App } from "./App";
+import { create } from 'react-test-renderer'
 
 it("should work", () => {
-  console.log(App ?? 4);
+  const renderer = create(<App />);
+  expect(renderer.toJSON()).toBeDefined()
 });
