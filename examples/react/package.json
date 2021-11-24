@@ -5,21 +5,21 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@swc/jest": "file:../..",
-    "react": "^16.13.1"
+    "react": "^17.0.0"
   },
   "jest": {
-    "rootDir": "src",
     "testMatch": [
       "<rootDir>/**/*.test.{ts,tsx,js,jsx}",
       "<rootDir>/*.test.{ts,tsx,js,jsx}"
     ],
+    "collectCoverage": true,
     "moduleFileExtensions": [
       "ts",
       "tsx",
@@ -30,14 +30,35 @@
     ],
     "transform": {
       "^.+\\.(t|j)sx?$": [
-        "../../.."
+        "@swc/jest",
+        {
+          "sourceMaps": true,
+
+          "jsc": {
+            "parser": {
+              "syntax": "typescript",
+              "tsx": true
+            },
+
+            "transform": {
+              "react": {
+                "runtime": "automatic"
+              }
+            }
+          }
+        }
       ]
     },
     "testEnvironment": "node"
   },
   "devDependencies": {
+    "@swc/core": "^1.2.112",
     "@types/jest": "^26.0.14",
+    "@types/react": "^17.0.36",
+    "@types/react-test-renderer": "^17.0.1",
+    "cross-env": "^7.0.3",
     "jest": "^26.4.2",
-    "typescript": "^4.0.2"
+    "react-test-renderer": "^17.0.0",
+    "typescript": "^4.5.2"
   }
 }
