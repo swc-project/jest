@@ -65,7 +65,6 @@ function buildSwcTransformOpts(swcOptions: any) {
   }
 
   set(swcOptions, 'jsc.transform.hidden.jest', true)
-  set(swcOptions, 'swcrc', false)
 
   return swcOptions
 }
