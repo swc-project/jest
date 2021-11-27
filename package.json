@@ -1,6 +1,6 @@
 {
   "name": "@swc/jest",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "description": "swc integration for jest",
   "main": "index.js",
   "homepage": "https://github.com/swc-project/jest",
