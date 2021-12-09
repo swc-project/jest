@@ -15,9 +15,9 @@ interface JestTransformerOption {
 }
 
 /**
- * Loads closes package.json in the directory hierarchy
+ * Loads closest package.json in the directory hierarchy
  */
-function loadClosesPackageJson(attempts = 1): Record<string, unknown> {
+function loadClosestPackageJson(attempts = 1): Record<string, unknown> {
   if (attempts > 5) {
       throw new Error('Can\'t resolve main package.json file');
   }
@@ -25,11 +25,11 @@ function loadClosesPackageJson(attempts = 1): Record<string, unknown> {
   try {
       return require(path.join(process.cwd(), mainPath, 'package.json'));
   } catch (e) {
-      return loadClosesPackageJson(attempts + 1);
+      return loadClosestPackageJson(attempts + 1);
   }
 }
 
-const packageConfig = loadClosesPackageJson()
+const packageConfig = loadClosestPackageJson()
 const isEsmProject = packageConfig.type === 'module'
 
 // Jest use the `vm` [Module API](https://nodejs.org/api/vm.html#vm_class_vm_module) for ESM.
@@ -47,7 +47,7 @@ function createTransformer(swcTransformOpts?: Options) {
 
       return transformSync(src, { ...swcTransformOpts, filename })
     },
-    
+
     getCacheKey: getCacheKeyFunction([], [JSON.stringify(swcTransformOpts)])
   }
 }
