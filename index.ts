@@ -34,14 +34,14 @@ const isEsmProject = packageConfig.type === 'module'
 
 // Jest use the `vm` [Module API](https://nodejs.org/api/vm.html#vm_class_vm_module) for ESM.
 // see https://github.com/facebook/jest/issues/9430
-const isSupportEsm = 'Module' in vm
+const supportsEsm = 'Module' in vm
 
 function createTransformer(swcTransformOpts?: Options) {
   swcTransformOpts = buildSwcTransformOpts(swcTransformOpts)
 
   return {
     process(src: string, filename: string, jestOptions: any) {
-      if (isSupportEsm) {
+      if (supportsEsm) {
         set(swcTransformOpts, 'module.type', isEsm(filename, jestOptions) ? 'es6' : 'commonjs')
       }
 
@@ -60,7 +60,7 @@ function buildSwcTransformOpts(swcOptions: any) {
     swcOptions = fs.existsSync(swcrc) ? JSON.parse(fs.readFileSync(swcrc, 'utf-8')) as Options : {}
   }
 
-  if (!isSupportEsm) {
+  if (!supportsEsm) {
     set(swcOptions, 'module.type', 'commonjs')
   }
 
