@@ -21,7 +21,7 @@ function loadClosestPackageJson(attempts = 1): Record<string, unknown> {
   if (attempts > 5) {
       throw new Error('Can\'t resolve main package.json file');
   }
-  var mainPath = attempts === 1 ? './' : Array(attempts).join("../");
+  const mainPath = attempts === 1 ? './' : Array(attempts).join("../");
   try {
       return require(path.join(process.cwd(), mainPath, 'package.json'));
   } catch (e) {
