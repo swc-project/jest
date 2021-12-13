@@ -5,9 +5,10 @@
   "main": "index.js",
   "homepage": "https://github.com/swc-project/jest",
   "scripts": {
-    "build": "tsc",
+    "build": "npm run lint && tsc",
     "test": "npm test --workspaces",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "lint": "eslint . --ext .ts && echo 'No lint errors found!'"
   },
   "keywords": [],
   "author": "강동윤 <kdy1997.dev@gmail.com>",
@@ -29,6 +30,9 @@
   "devDependencies": {
     "@swc/core": "^1.2.85",
     "@types/node": "^16.11.12",
+    "@typescript-eslint/eslint-plugin": "^5.6.0",
+    "@typescript-eslint/parser": "^5.6.0",
+    "eslint": "^8.4.1",
     "jest": "^27.4.4",
     "typescript": "^4.5.3"
   },

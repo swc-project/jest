@@ -1,7 +1,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import * as vm from 'vm'
-import getCacheKeyFunction from '@jest/create-cache-key-function';
+import getCacheKeyFunction from '@jest/create-cache-key-function'
 import { transformSync, Options } from '@swc/core'
 
 interface JestConfig {
@@ -19,13 +19,13 @@ interface JestTransformerOption {
  */
 function loadClosestPackageJson(attempts = 1): Record<string, unknown> {
   if (attempts > 5) {
-      throw new Error('Can\'t resolve main package.json file');
+      throw new Error('Can\'t resolve main package.json file')
   }
-  const mainPath = attempts === 1 ? './' : Array(attempts).join("../");
+  const mainPath = attempts === 1 ? './' : Array(attempts).join('../')
   try {
-      return require(path.join(process.cwd(), mainPath, 'package.json'));
+      return require(path.join(process.cwd(), mainPath, 'package.json'))
   } catch (e) {
-      return loadClosestPackageJson(attempts + 1);
+      return loadClosestPackageJson(attempts + 1)
   }
 }
 
@@ -63,7 +63,7 @@ function getOptionsFromSwrc(): Options {
 }
 
 function buildSwcTransformOpts(swcOptions: Options | undefined): Options {
-  const computedSwcOptions = swcOptions || getOptionsFromSwrc();
+  const computedSwcOptions = swcOptions || getOptionsFromSwrc()
 
   if (!supportsEsm) {
     set(computedSwcOptions, 'module.type', 'commonjs')
