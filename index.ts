@@ -37,36 +37,41 @@ const isEsmProject = packageConfig.type === 'module'
 const supportsEsm = 'Module' in vm
 
 function createTransformer(swcTransformOpts?: Options) {
-  swcTransformOpts = buildSwcTransformOpts(swcTransformOpts)
+  const computedSwcOptions = buildSwcTransformOpts(swcTransformOpts)
 
   return {
     process(src: string, filename: string, jestOptions: any) {
       if (supportsEsm) {
-        set(swcTransformOpts, 'module.type', isEsm(filename, jestOptions) ? 'es6' : 'commonjs')
+        set(computedSwcOptions, 'module.type', isEsm(filename, jestOptions) ? 'es6' : 'commonjs')
       }
 
-      return transformSync(src, { ...swcTransformOpts, filename })
+      return transformSync(src, { ...computedSwcOptions, filename })
     },
 
-    getCacheKey: getCacheKeyFunction([], [JSON.stringify(swcTransformOpts)])
+    getCacheKey: getCacheKeyFunction([], [JSON.stringify(computedSwcOptions)])
   }
 }
 
 export = { createTransformer };
 
-function buildSwcTransformOpts(swcOptions: any) {
-  if (!swcOptions) {
-    const swcrc = path.join(process.cwd(), '.swcrc')
-    swcOptions = fs.existsSync(swcrc) ? JSON.parse(fs.readFileSync(swcrc, 'utf-8')) as Options : {}
+function getOptionsFromSwrc(): Options {
+  const swcrc = path.join(process.cwd(), '.swcrc')
+  if(fs.existsSync(swcrc)) {
+    return JSON.parse(fs.readFileSync(swcrc, 'utf-8')) as Options
   }
+  return {}
+}
+
+function buildSwcTransformOpts(swcOptions: Options | undefined): Options {
+  const computedSwcOptions = swcOptions || getOptionsFromSwrc();
 
   if (!supportsEsm) {
-    set(swcOptions, 'module.type', 'commonjs')
+    set(computedSwcOptions, 'module.type', 'commonjs')
   }
 
-  set(swcOptions, 'jsc.transform.hidden.jest', true)
+  set(computedSwcOptions, 'jsc.transform.hidden.jest', true)
 
-  return swcOptions
+  return computedSwcOptions
 }
 
 function getJestConfig(jestConfig: JestConfig | JestTransformerOption) {
