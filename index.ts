@@ -19,13 +19,13 @@ interface JestTransformerOption {
  */
 function loadClosestPackageJson(attempts = 1): Record<string, unknown> {
   if (attempts > 5) {
-      throw new Error('Can\'t resolve main package.json file')
+    throw new Error('Can\'t resolve main package.json file')
   }
   const mainPath = attempts === 1 ? './' : Array(attempts).join('../')
   try {
-      return require(path.join(process.cwd(), mainPath, 'package.json'))
+    return require(path.join(process.cwd(), mainPath, 'package.json'))
   } catch (e) {
-      return loadClosestPackageJson(attempts + 1)
+    return loadClosestPackageJson(attempts + 1)
   }
 }
 
@@ -45,6 +45,8 @@ function createTransformer(swcTransformOpts?: Options) {
         set(computedSwcOptions, 'module.type', isEsm(filename, jestOptions) ? 'es6' : 'commonjs')
       }
 
+      set(swcTransformOpts, 'sourceMaps', 'inline')
+
       return transformSync(src, { ...computedSwcOptions, filename })
     },
 
@@ -56,7 +58,7 @@ export = { createTransformer };
 
 function getOptionsFromSwrc(): Options {
   const swcrc = path.join(process.cwd(), '.swcrc')
-  if(fs.existsSync(swcrc)) {
+  if (fs.existsSync(swcrc)) {
     return JSON.parse(fs.readFileSync(swcrc, 'utf-8')) as Options
   }
   return {}
