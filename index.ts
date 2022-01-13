@@ -45,8 +45,8 @@ function createTransformer(swcTransformOpts?: Options) {
         set(computedSwcOptions, 'module.type', isEsm(filename, jestOptions) ? 'es6' : 'commonjs')
       }
 
-      if (!swcTransformOpts?.sourceMaps) {
-        set(swcTransformOpts, 'sourceMaps', 'inline')
+      if (!computedSwcOptions.sourceMaps) {
+        set(computedSwcOptions, 'sourceMaps', 'inline')
       }
 
       return transformSync(src, { ...computedSwcOptions, filename })
