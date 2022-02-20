@@ -1,6 +1,6 @@
 # @swc/jest
 
-[swc][] binding for the jest
+[swc][] binding for jest
 
 ## Installation
 
