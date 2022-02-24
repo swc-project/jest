@@ -39,7 +39,7 @@ module.exports = {
 
 ## Q & A
 
-**Q: Jest use CommonJS in default. But I want to use ESM.**
+### Q: Jest use CommonJS in default. But I want to use ESM.
 
 A: Setup Jest following this [Guide](https://jestjs.io/docs/ecmascript-modules).
 
@@ -69,6 +69,36 @@ A: Setup Jest following this [Guide](https://jestjs.io/docs/ecmascript-modules).
   # or
   node --experimental-vm-modules ./node_modules/jest/bin/jest.js
   ```
+
+### Q: What ECMAScript target is set by `jsc.target`?
+
+A: By default, the version supported by your Node runtime.
+
+| Node version | Default `jsc.target` |
+|--------------|----------------------|
+| 12           | 'es2018'             |
+| 13           | 'es2019'             |
+| 14           | 'es2020'             |
+| 15           | 'es2021'             |
+| 16           | 'es2021'             |
+| 17           | 'es2022'             |
+
+You can customize this by setting an explicit version in your config:
+
+```js
+module.exports = {
+    transform: {
+        "^.+\\.(t|j)sx?$": [
+            "@swc/jest",
+            {
+                jsc: {
+                    target: "es2021",
+                },
+            },
+        ],
+    },
+}
+```
 
 ## License
 
