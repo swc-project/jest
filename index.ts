@@ -74,7 +74,7 @@ const nodeTargetDefaults = new Map([
   ['15', 'es2021'],
   ['16', 'es2021'],
   ['17', 'es2022'],
-]);
+])
 
 function buildSwcTransformOpts(swcOptions: Options | undefined): Options {
   const computedSwcOptions = swcOptions || getOptionsFromSwrc()
@@ -87,6 +87,7 @@ function buildSwcTransformOpts(swcOptions: Options | undefined): Options {
     set(
       computedSwcOptions,
       'jsc.target',
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       nodeTargetDefaults.get(process.version.match(/v(\d+)/)![1]) || 'es2018'
     )
   }
