@@ -13,8 +13,6 @@ function createTransformer(swcTransformOpts?: Options): Transformer {
 
   return {
     process(src, filename, jestOptions) {
-      set(computedSwcOptions, 'module.type', jestOptions.supportsStaticESM ? 'es6' : 'commonjs')
-
       return transformSync(src, {
         ...computedSwcOptions,
         module: {
