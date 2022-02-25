@@ -1,5 +1,6 @@
 import * as fs from 'fs'
 import * as path from 'path'
+import * as process from 'process'
 import * as vm from 'vm'
 import getCacheKeyFunction from '@jest/create-cache-key-function'
 import { transformSync, Options } from '@swc/core'
@@ -66,11 +67,29 @@ function getOptionsFromSwrc(): Options {
   return {}
 }
 
+const nodeTargetDefaults = new Map([
+  ['12', 'es2018'],
+  ['13', 'es2019'],
+  ['14', 'es2020'],
+  ['15', 'es2021'],
+  ['16', 'es2021'],
+  ['17', 'es2022'],
+])
+
 function buildSwcTransformOpts(swcOptions: Options | undefined): Options {
   const computedSwcOptions = swcOptions || getOptionsFromSwrc()
 
   if (!supportsEsm) {
     set(computedSwcOptions, 'module.type', 'commonjs')
+  }
+
+  if (!computedSwcOptions.jsc?.target) {
+    set(
+      computedSwcOptions,
+      'jsc.target',
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      nodeTargetDefaults.get(process.version.match(/v(\d+)/)![1]) || 'es2018'
+    )
   }
 
   set(computedSwcOptions, 'jsc.transform.hidden.jest', true)
