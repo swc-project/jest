@@ -1,36 +1,55 @@
 import * as fs from 'fs'
+import * as crypto from 'crypto'
 import * as path from 'path'
 import * as process from 'process'
 import getCacheKeyFunction from '@jest/create-cache-key-function'
-import type { Transformer } from '@jest/transform'
+import type { Transformer, TransformOptions } from '@jest/transform'
 import { transformSync, transform, Options } from '@swc/core'
 
 function createTransformer(swcTransformOpts?: Options): Transformer {
   const computedSwcOptions = buildSwcTransformOpts(swcTransformOpts)
 
+  const cacheKeyFunction = getCacheKeyFunction([], [JSON.stringify(computedSwcOptions)])
+
   return {
     process(src, filename, jestOptions) {
       set(computedSwcOptions, 'module.type', jestOptions.supportsStaticESM ? 'es6' : 'commonjs')
 
-      if (!computedSwcOptions.sourceMaps) {
-        set(computedSwcOptions, 'sourceMaps', 'inline')
-      }
-
-      return transformSync(src, { ...computedSwcOptions, filename })
+      return transformSync(src, {
+        ...computedSwcOptions,
+        module: {
+          ...computedSwcOptions.module,
+          type: jestOptions.supportsStaticESM ? 'es6' : 'commonjs'
+        },
+        filename
+      })
     },
     processAsync(src, filename) {
-      // async transform is always ESM
-      set(computedSwcOptions, 'module.type', 'es6')
-
-      if (!computedSwcOptions.sourceMaps) {
-        set(computedSwcOptions, 'sourceMaps', 'inline')
-      }
-
-      return transform(src, { ...computedSwcOptions, filename })
+      return transform(src, {
+        ...computedSwcOptions,
+        module: {
+          ...computedSwcOptions.module,
+          // async transform is always ESM
+          type: 'es6'
+        },
+        filename
+      })
     },
 
-    // @ts-expect-error - type overload is confused
-    getCacheKey: getCacheKeyFunction([], [JSON.stringify(computedSwcOptions)])
+    getCacheKey(src, filename, ...rest){
+      // @ts-expect-error - type overload is confused
+      const baseCacheKey = cacheKeyFunction(src, filename, ...rest)
+
+      // @ts-expect-error - signature mismatch between Jest <27 og >=27
+      const options: TransformOptions = typeof rest[0] === 'string' ? rest[1] : rest[0]
+
+      return crypto
+        .createHash('md5')
+        .update(baseCacheKey)
+        .update('\0', 'utf8')
+        .update(JSON.stringify({ supportsStaticESM: options.supportsStaticESM }))
+        .digest('hex')
+    }
   }
 }
 
@@ -66,6 +85,10 @@ function buildSwcTransformOpts(swcOptions: Options | undefined): Options {
   }
 
   set(computedSwcOptions, 'jsc.transform.hidden.jest', true)
+
+  if (!computedSwcOptions.sourceMaps) {
+    set(computedSwcOptions, 'sourceMaps', 'inline')
+  }
 
   return computedSwcOptions
 }
