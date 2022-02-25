@@ -12,7 +12,7 @@ function createTransformer(swcTransformOpts?: Options): Transformer {
   const cacheKeyFunction = getCacheKeyFunction([], [JSON.stringify(computedSwcOptions)])
 
   return {
-    process(src, filename, jestOptions) {
+    process(src: any, filename: any, jestOptions: any) {
       set(computedSwcOptions, 'module.type', jestOptions.supportsStaticESM ? 'es6' : 'commonjs')
 
       return transformSync(src, {
@@ -24,7 +24,7 @@ function createTransformer(swcTransformOpts?: Options): Transformer {
         filename
       })
     },
-    processAsync(src, filename) {
+    processAsync(src: any, filename: any) {
       return transform(src, {
         ...computedSwcOptions,
         module: {
@@ -36,11 +36,10 @@ function createTransformer(swcTransformOpts?: Options): Transformer {
       })
     },
 
-    getCacheKey(src, filename, ...rest){
+    getCacheKey(src: any, filename: any, ...rest: any) {
       // @ts-expect-error - type overload is confused
       const baseCacheKey = cacheKeyFunction(src, filename, ...rest)
 
-      // @ts-expect-error - signature mismatch between Jest <27 og >=27
       const options: TransformOptions = typeof rest[0] === 'string' ? rest[1] : rest[0]
 
       return crypto
