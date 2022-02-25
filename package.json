@@ -28,6 +28,7 @@
     "@jest/create-cache-key-function": "^27.4.2"
   },
   "devDependencies": {
+    "@jest/transform": "^27.4.4",
     "@swc/core": "^1.2.85",
     "@types/node": "^16.11.12",
     "@typescript-eslint/eslint-plugin": "^5.6.0",
