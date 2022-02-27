@@ -13,13 +13,11 @@ function createTransformer(swcTransformOpts?: Options): Transformer {
 
   return {
     process(src, filename, jestOptions) {
-      set(computedSwcOptions, 'module.type', jestOptions.supportsStaticESM ? 'es6' : 'commonjs')
-
       return transformSync(src, {
         ...computedSwcOptions,
         module: {
           ...computedSwcOptions.module,
-          type: jestOptions.supportsStaticESM ? 'es6' : 'commonjs'
+          type: (jestOptions.supportsStaticESM ? 'es6' : 'commonjs' as any)
         },
         filename
       })
@@ -30,7 +28,7 @@ function createTransformer(swcTransformOpts?: Options): Transformer {
         module: {
           ...computedSwcOptions.module,
           // async transform is always ESM
-          type: 'es6'
+          type: ('es6' as any)
         },
         filename
       })
