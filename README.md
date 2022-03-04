@@ -1,6 +1,6 @@
 # @swc/jest
 
-[swc][] binding for the jest
+[SWC][] binding for Jest.
 
 ## Installation
 
@@ -23,7 +23,7 @@ module.exports = {
 }
 ```
 
-It will load swc configuration from `.swcrc` in default. You also can custom it:
+It will load the SWC configuration from `.swcrc` by default. You also can customize it:
 
 ```js
 const fs = require('fs')
@@ -32,18 +32,18 @@ const config = JSON.parse(fs.readFileSync(`${__dirname}/.swcrc`, 'utf-8'))
 
 module.exports = {
   transform: {
-    '^.+\\.(t|j)sx?$': ['@swc/jest', { ...config, /* custom configuration in jest */ }],
+    '^.+\\.(t|j)sx?$': ['@swc/jest', { ...config, /* custom configuration in Jest */ }],
   },
 }
 ```
 
 ## Q & A
 
-### Q: Jest use CommonJS in default. But I want to use ESM.
+### Q: Jest uses CommonJS by default. But I want to use ESM.
 
 A: Setup Jest following this [Guide](https://jestjs.io/docs/ecmascript-modules).
 
-  For JavaScript, it need to configure `package.json`:
+  For JavaScript, edit `package.json` as follows:
   
   ```json
   {
@@ -52,7 +52,7 @@ A: Setup Jest following this [Guide](https://jestjs.io/docs/ecmascript-modules).
   }
   ```
 
-  For TypeScript, it need some configuration in `jest.config.js`:
+  For TypeScript, edit `jest.config.js` as follows:
 
   ```js
   module.exports = {
@@ -83,7 +83,7 @@ A: By default, the version supported by your Node runtime.
 | 16           | 'es2021'             |
 | 17           | 'es2022'             |
 
-You can customize this by setting an explicit version in your config:
+You can customize this by setting an explicit version in `jest.config.js`:
 
 ```js
 module.exports = {
@@ -104,4 +104,4 @@ module.exports = {
 
 MIT
 
-[swc]: https://swc.rs
+[SWC]: https://swc.rs
