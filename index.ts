@@ -1,58 +1,53 @@
 import * as fs from 'fs'
+import * as crypto from 'crypto'
 import * as path from 'path'
-import * as vm from 'vm'
+import * as process from 'process'
 import getCacheKeyFunction from '@jest/create-cache-key-function'
-import { transformSync, Options } from '@swc/core'
+import type { Transformer, TransformOptions } from '@jest/transform'
+import { transformSync, transform, Options } from '@swc/core'
 
-interface JestConfig {
-  transform: [match: string, transformerPath: string, options: Options][];
-  extensionsToTreatAsEsm?: string[]
-}
-
-interface JestTransformerOption {
-  config: JestConfig;
-  transformerConfig: Options;
-}
-
-/**
- * Loads closest package.json in the directory hierarchy
- */
-function loadClosestPackageJson(attempts = 1): Record<string, unknown> {
-  if (attempts > 5) {
-    throw new Error('Can\'t resolve main package.json file')
-  }
-  const mainPath = attempts === 1 ? './' : Array(attempts).join('../')
-  try {
-    return require(path.join(process.cwd(), mainPath, 'package.json'))
-  } catch (e) {
-    return loadClosestPackageJson(attempts + 1)
-  }
-}
-
-const packageConfig = loadClosestPackageJson()
-const isEsmProject = packageConfig.type === 'module'
-
-// Jest use the `vm` [Module API](https://nodejs.org/api/vm.html#vm_class_vm_module) for ESM.
-// see https://github.com/facebook/jest/issues/9430
-const supportsEsm = 'Module' in vm
-
-function createTransformer(swcTransformOpts?: Options) {
+function createTransformer(swcTransformOpts?: Options): Transformer {
   const computedSwcOptions = buildSwcTransformOpts(swcTransformOpts)
 
+  const cacheKeyFunction = getCacheKeyFunction([], [JSON.stringify(computedSwcOptions)])
+
   return {
-    process(src: string, filename: string, jestOptions: any) {
-      if (supportsEsm) {
-        set(computedSwcOptions, 'module.type', isEsm(filename, jestOptions) ? 'es6' : 'commonjs')
-      }
-
-      if (!computedSwcOptions.sourceMaps) {
-        set(computedSwcOptions, 'sourceMaps', 'inline')
-      }
-
-      return transformSync(src, { ...computedSwcOptions, filename })
+    process(src, filename, jestOptions) {
+      return transformSync(src, {
+        ...computedSwcOptions,
+        module: {
+          ...computedSwcOptions.module,
+          type: (jestOptions.supportsStaticESM ? 'es6' : 'commonjs' as any)
+        },
+        filename
+      })
+    },
+    processAsync(src, filename) {
+      return transform(src, {
+        ...computedSwcOptions,
+        module: {
+          ...computedSwcOptions.module,
+          // async transform is always ESM
+          type: ('es6' as any)
+        },
+        filename
+      })
     },
 
-    getCacheKey: getCacheKeyFunction([], [JSON.stringify(computedSwcOptions)])
+    getCacheKey(src, filename, ...rest){
+      // @ts-expect-error - type overload is confused
+      const baseCacheKey = cacheKeyFunction(src, filename, ...rest)
+
+      // @ts-expect-error - signature mismatch between Jest <27 og >=27
+      const options: TransformOptions = typeof rest[0] === 'string' ? rest[1] : rest[0]
+
+      return crypto
+        .createHash('md5')
+        .update(baseCacheKey)
+        .update('\0', 'utf8')
+        .update(JSON.stringify({ supportsStaticESM: options.supportsStaticESM }))
+        .digest('hex')
+    }
   }
 }
 
@@ -66,29 +61,34 @@ function getOptionsFromSwrc(): Options {
   return {}
 }
 
+const nodeTargetDefaults = new Map([
+  ['12', 'es2018'],
+  ['13', 'es2019'],
+  ['14', 'es2020'],
+  ['15', 'es2021'],
+  ['16', 'es2021'],
+  ['17', 'es2022'],
+])
+
 function buildSwcTransformOpts(swcOptions: Options | undefined): Options {
   const computedSwcOptions = swcOptions || getOptionsFromSwrc()
 
-  if (!supportsEsm) {
-    set(computedSwcOptions, 'module.type', 'commonjs')
+  if (!computedSwcOptions.jsc?.target) {
+    set(
+      computedSwcOptions,
+      'jsc.target',
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      nodeTargetDefaults.get(process.version.match(/v(\d+)/)![1]) || 'es2018'
+    )
   }
 
   set(computedSwcOptions, 'jsc.transform.hidden.jest', true)
 
+  if (!computedSwcOptions.sourceMaps) {
+    set(computedSwcOptions, 'sourceMaps', 'inline')
+  }
+
   return computedSwcOptions
-}
-
-function getJestConfig(jestConfig: JestConfig | JestTransformerOption) {
-  return 'config' in jestConfig
-    // jest 27
-    ? jestConfig.config
-    // jest 26
-    : jestConfig
-}
-
-function isEsm(filename: string, jestOptions: any) {
-  return (/\.jsx?$/.test(filename) && isEsmProject) ||
-    getJestConfig(jestOptions).extensionsToTreatAsEsm?.find((ext: string) => filename.endsWith(ext))
 }
 
 function set(obj: any, path: string, value: any) {
