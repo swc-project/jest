@@ -6,13 +6,28 @@ import getCacheKeyFunction from '@jest/create-cache-key-function'
 import type { Transformer, TransformOptions } from '@jest/transform'
 import { transformSync, transform, Options } from '@swc/core'
 
-function createTransformer(swcTransformOpts?: Options): Transformer {
+function createTransformer(swcTransformOpts?: Options & {
+  experimental?: {
+    customCoverageInstrumentation?: {
+      enabled: boolean
+      coverageVariable?: string,
+      compact?: boolean,
+      reportLogic?: boolean,
+      ignoreClassMethods?: Array<string>,
+      instrumentLog?: { level: string, enableTrace: boolean }
+    }
+  }
+}): Transformer {
   const computedSwcOptions = buildSwcTransformOpts(swcTransformOpts)
 
   const cacheKeyFunction = getCacheKeyFunction([], [JSON.stringify(computedSwcOptions)])
-
+  const { enabled: canInstrument, ...instrumentOptions } = swcTransformOpts?.experimental?.customCoverageInstrumentation ?? {}
   return {
+    canInstrument: !!canInstrument, // Tell jest we'll instrument by our own
     process(src, filename, jestOptions) {
+      // Determine if we actually instrument codes if jest runs with --coverage
+      insertInstrumentationOptions(jestOptions, !!canInstrument, computedSwcOptions, instrumentOptions)
+
       return transformSync(src, {
         ...computedSwcOptions,
         module: {
@@ -22,7 +37,9 @@ function createTransformer(swcTransformOpts?: Options): Transformer {
         filename
       })
     },
-    processAsync(src, filename) {
+    processAsync(src, filename, jestOptions) {
+      insertInstrumentationOptions(jestOptions, !!canInstrument, computedSwcOptions, instrumentOptions)
+
       return transform(src, {
         ...computedSwcOptions,
         module: {
@@ -34,7 +51,7 @@ function createTransformer(swcTransformOpts?: Options): Transformer {
       })
     },
 
-    getCacheKey(src, filename, ...rest){
+    getCacheKey(src, filename, ...rest) {
       // @ts-expect-error - type overload is confused
       const baseCacheKey = cacheKeyFunction(src, filename, ...rest)
 
@@ -70,8 +87,9 @@ const nodeTargetDefaults = new Map([
   ['17', 'es2022'],
 ])
 
-function buildSwcTransformOpts(swcOptions: Options | undefined): Options {
-  const computedSwcOptions = swcOptions || getOptionsFromSwrc()
+function buildSwcTransformOpts(swcOptions: (Options & { experimental?: unknown }) | undefined): Options {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { experimental, ...computedSwcOptions } = swcOptions || (getOptionsFromSwrc() as Options & { experimental?: unknown })
 
   if (!computedSwcOptions.jsc?.target) {
     set(
@@ -89,6 +107,32 @@ function buildSwcTransformOpts(swcOptions: Options | undefined): Options {
   }
 
   return computedSwcOptions
+}
+
+function insertInstrumentationOptions(jestOptions: TransformOptions<unknown>, canInstrument: boolean, swcTransformOpts: Options, instrumentOptions?: any) {
+  const shouldInstrument = jestOptions.instrument && canInstrument
+
+  if (!shouldInstrument) {
+    return swcTransformOpts
+  }
+
+  if (swcTransformOpts?.jsc?.experimental?.plugins?.some((x) => x[0] === 'swc-plugin-coverage-instrument')) {
+    return
+  }
+
+  if (!swcTransformOpts.jsc) {
+    swcTransformOpts.jsc = {}
+  }
+
+  if (!swcTransformOpts.jsc.experimental) {
+    swcTransformOpts.jsc.experimental = {}
+  }
+
+  if (!Array.isArray(!swcTransformOpts.jsc.experimental.plugins)) {
+    swcTransformOpts.jsc.experimental.plugins = []
+  }
+
+  swcTransformOpts.jsc.experimental.plugins?.push(['swc-plugin-coverage-instrument', instrumentOptions ?? {}])
 }
 
 function set(obj: any, path: string, value: any) {
