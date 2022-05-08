@@ -42,5 +42,8 @@
   },
   "files": [
     "index.js"
+  ],
+  "workspaces": [
+    "examples/react"
   ]
 }
