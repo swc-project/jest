@@ -3,6 +3,7 @@
   "version": "0.2.21",
   "description": "swc integration for jest",
   "main": "index.js",
+  "types": "index.d.ts",
   "homepage": "https://github.com/swc-project/jest",
   "scripts": {
     "build": "npm run lint && tsc",
@@ -41,7 +42,8 @@
     "npm": ">= 7.0.0"
   },
   "files": [
-    "index.js"
+    "index.js",
+    "index.d.ts"
   ],
   "workspaces": [
     "examples/react"
