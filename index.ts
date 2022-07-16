@@ -4,7 +4,7 @@ import * as path from 'path'
 import * as process from 'process'
 import getCacheKeyFunction from '@jest/create-cache-key-function'
 import type { Transformer, TransformOptions } from '@jest/transform'
-import { transformSync, transform, Options } from '@swc/core'
+import { transformSync, transform, Options, version as swcVersion } from '@swc/core'
 import { version } from './package.json'
 
 function createTransformer(swcTransformOpts?: Options & {
@@ -21,7 +21,7 @@ function createTransformer(swcTransformOpts?: Options & {
 }): Transformer {
   const computedSwcOptions = buildSwcTransformOpts(swcTransformOpts)
 
-  const cacheKeyFunction = getCacheKeyFunction([], [version, JSON.stringify(computedSwcOptions)])
+  const cacheKeyFunction = getCacheKeyFunction([], [swcVersion, version, JSON.stringify(computedSwcOptions)])
   const { enabled: canInstrument, ...instrumentOptions } = swcTransformOpts?.experimental?.customCoverageInstrumentation ?? {}
   return {
     canInstrument: !!canInstrument, // Tell jest we'll instrument by our own
