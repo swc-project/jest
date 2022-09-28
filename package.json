@@ -25,7 +25,8 @@
     "@swc/core": "*"
   },
   "dependencies": {
-    "@jest/create-cache-key-function": "^27.4.2"
+    "@jest/create-cache-key-function": "^27.4.2",
+    "jsonc-parser": "^3.2.0"
   },
   "devDependencies": {
     "@jest/transform": "^27.5.1",

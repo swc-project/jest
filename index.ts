@@ -4,6 +4,7 @@ import * as path from 'path'
 import * as process from 'process'
 import getCacheKeyFunction from '@jest/create-cache-key-function'
 import type { Transformer, TransformOptions } from '@jest/transform'
+import { parse as parseJsonC, type ParseError } from 'jsonc-parser'
 import { transformSync, transform, Options, version as swcVersion } from '@swc/core'
 import { version } from './package.json'
 
@@ -74,7 +75,14 @@ export = { createTransformer };
 function getOptionsFromSwrc(): Options {
   const swcrc = path.join(process.cwd(), '.swcrc')
   if (fs.existsSync(swcrc)) {
-    return JSON.parse(fs.readFileSync(swcrc, 'utf-8')) as Options
+    const errors = [] as ParseError[]
+    const options = parseJsonC(fs.readFileSync(swcrc, 'utf-8'), errors)
+
+    if (errors.length > 0) {
+      throw new Error(`Error parsing ${swcrc}: ${errors.join(', ')}`)
+    }
+
+    return options as Options
   }
   return {}
 }
