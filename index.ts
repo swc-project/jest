@@ -137,7 +137,7 @@ function insertInstrumentationOptions(jestOptions: TransformOptions<unknown>, ca
     swcTransformOpts.jsc.experimental = {}
   }
 
-  if (!Array.isArray(!swcTransformOpts.jsc.experimental.plugins)) {
+  if (!Array.isArray(swcTransformOpts.jsc.experimental.plugins)) {
     swcTransformOpts.jsc.experimental.plugins = []
   }
 
