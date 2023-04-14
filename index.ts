@@ -94,9 +94,13 @@ const nodeTargetDefaults = new Map([
   ['15', 'es2021'],
   ['16', 'es2021'],
   ['17', 'es2022'],
-  ['18', 'es2023'],
-  ['19', 'es2023'],
-  ['20', 'es2023'],
+  ['18', 'es2022'],
+  ['19', 'es2022'],
+  ['20', 'es2022'],
+  // TODO: Use es2023 once @swc/core supports it
+  // ['18', 'es2023'],
+  // ['19', 'es2023'],
+  // ['20', 'es2023'],
 ])
 
 function buildSwcTransformOpts(swcOptions: (Options & { experimental?: unknown }) | undefined): Options {
