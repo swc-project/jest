@@ -7,7 +7,8 @@
   "scripts": {
     "build": "npm run lint && tsc",
     "test": "npm test --workspaces",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "npm run build && node scripts/publish_helper.js prepublish",
+    "postpublish": "node scripts/publish_helper.js postpublish",
     "lint": "eslint . --ext .ts && echo 'No lint errors found!'"
   },
   "keywords": [],
