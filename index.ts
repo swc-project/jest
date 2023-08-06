@@ -107,7 +107,7 @@ function buildSwcTransformOpts(swcOptions: (Options & { experimental?: unknown }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { experimental, ...computedSwcOptions } = swcOptions || (getOptionsFromSwrc() as Options & { experimental?: unknown })
 
-  if (!computedSwcOptions.jsc?.target) {
+  if (!computedSwcOptions.env && !computedSwcOptions.jsc?.target) {
     set(
       computedSwcOptions,
       'jsc.target',
