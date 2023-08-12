@@ -122,6 +122,10 @@ function buildSwcTransformOpts(swcOptions: (Options & { experimental?: unknown }
     set(computedSwcOptions, 'sourceMaps', 'inline')
   }
 
+  if (computedSwcOptions.jsc?.baseUrl) {
+    set(computedSwcOptions, 'jsc.baseUrl', path.resolve(computedSwcOptions.jsc.baseUrl))
+  }
+
   return computedSwcOptions
 }
 
