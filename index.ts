@@ -61,7 +61,7 @@ function createTransformer(swcTransformOpts?: Options & {
       const options: TransformOptions = typeof rest[0] === 'string' ? rest[1] : rest[0]
 
       return crypto
-        .createHash('md5')
+        .createHash('sha1')
         .update(baseCacheKey)
         .update('\0', 'utf8')
         .update(JSON.stringify({ supportsStaticESM: options.supportsStaticESM }))
