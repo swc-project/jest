@@ -105,7 +105,10 @@ const nodeTargetDefaults = new Map([
 
 function buildSwcTransformOpts(swcOptions: (Options & { experimental?: unknown }) | undefined): Options {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { experimental, ...computedSwcOptions } = swcOptions || (getOptionsFromSwrc() as Options & { experimental?: unknown })
+  const { experimental, ...computedSwcOptions } =
+    swcOptions && Object.keys(swcOptions).length > 0
+      ? swcOptions
+      : getOptionsFromSwrc() as Options & { experimental?: unknown }
 
   if (!computedSwcOptions.env && !computedSwcOptions.jsc?.target) {
     set(
